@@ -1,0 +1,210 @@
+$prefix: '' !default;
+$separator: '\\:' !default;
+
+$sm: 576px !default;
+$md: 768px !default;
+$lg: 992px !default;
+$xl: 1200px !default;
+$xxl: 1400px !default;
+$gutter: .5rem !default;
+
+$breakpoints: (
+    'sm': $sm,
+    'md': $md,
+    'lg': $lg,
+    'xl': $xl,
+    'xxl': $xxl) !default;
+
+
+$holder-widths: (
+    sm: 540px,
+    md: 720px,
+    lg: 960px,
+    xl: 1140px,
+    xxl: 1320px
+);
+
+$holder-selectors: (
+    '',
+    sm,
+    md,
+    lg,
+    xl,
+    xxl
+);
+
+$block-columns: (
+    "col-1": 8.3333%,
+    "col-2": 16.6667%,
+    "col-3": 25%,
+    "col-4": 33.3333%,
+    "col-5": 41.6667%,
+    "col-6": 50%,
+    "col-7": 58.3333%,
+    "col-8": 66.6667%,
+    "col-9": 75%,
+    "col-10": 83.3333%,
+    "col-11": 91.6667%,
+    "col-12": 100%) !default;
+
+$block-column-offsets: (
+    "col-offset-0": 0,
+    "col-offset-1": 8.3333%,
+    "col-offset-2": 16.6667%,
+    "col-offset-3": 25%,
+    "col-offset-4": 33.3333%,
+    "col-offset-5": 41.6667%,
+    "col-offset-6": 50%,
+    "col-offset-7": 58.3333%,
+    "col-offset-8": 66.6667%,
+    "col-offset-9": 75%,
+    "col-offset-10": 83.3333%,
+    "col-offset-11": 91.6667%,
+    "col-offset-12": 100%,
+    ) !default;
+
+*,
+::after,
+::before {
+    box-sizing: border-box;
+}
+
+html,
+body {
+    margin: 0;
+    padding: 0;
+}
+
+.#{$prefix}block {
+    display: flex;
+    flex-wrap: wrap;
+    margin: -1 * $gutter -1 * $gutter 0 -1 * $gutter;
+}
+
+.#{$prefix}block>#{$prefix}.col,
+.#{$prefix}block>[class*="#{$prefix}col"] {
+    box-sizing: border-box;
+}
+
+.#{$prefix}block-nogutter {
+    margin: 0;
+}
+
+.#{$prefix}block-nogutter>.#{$prefix}col,
+.#{$prefix}block-nogutter>[class*="#{$prefix}col-"] {
+    padding: 0;
+}
+
+.#{$prefix}col {
+    flex-grow: 1;
+    flex-basis: 0;
+    padding: $gutter;
+}
+
+.#{$prefix}col-fixed {
+    flex: 0 0 auto;
+    padding: $gutter;
+}
+
+@mixin holder-classes {
+    .holder {
+        width: 100%;
+        padding-right: var(--bs-gutter-x, 0.75rem
+        );
+    padding-left: var(--bs-gutter-x, 0.75rem);
+    margin-right: auto;
+    margin-left: auto;
+}
+
+@each $selector in $holder-selectors {
+    $breakpoint: $selector;
+    $max-width: map-get($holder-widths, $breakpoint);
+    $comma-selectors: ();
+
+    @for $i from 1 through index($holder-selectors, $selector) {
+        $comma-selector: '.holder-'+nth($holder-selectors, $i);
+
+        @if $i ==1 {
+            $comma-selector: '.holder';
+        }
+
+        $comma-selectors: append($comma-selectors, $comma-selector, comma);
+    }
+
+    $comma-selectors: join($comma-selectors, ', ');
+
+    @if $max-width !=null {
+        @media (min-width: map-get($breakpoints, $breakpoint)) {
+            #{$comma-selectors} {
+                max-width: $max-width;
+            }
+        }
+    }
+}
+}
+
+@include holder-classes;
+
+
+@each $col,
+$width in $block-columns {
+    .#{$prefix}#{$col} {
+        flex: 0 0 auto;
+        padding: $gutter;
+        width: #{$width};
+    }
+}
+
+@each $key,
+$val in $breakpoints {
+    @media screen and (min-width: #{$val}) {
+        .#{$key + $separator} {
+            &#{$prefix}col {
+                flex-grow: 1;
+                flex-basis: 0;
+                padding: $gutter;
+            }
+
+            &#{$prefix}col-fixed {
+                flex: 0 0 auto;
+                padding: $gutter;
+            }
+
+            @each $col,
+            $width in $block-columns {
+                &#{$prefix}#{$col} {
+                    flex: 0 0 auto;
+                    padding: $gutter;
+                    width: #{$width};
+                }
+            }
+        }
+    }
+}
+
+@mixin style-class($prop, $map) {
+
+    @each $key,
+    $val in $map {
+        .#{$prefix}#{$key} {
+            #{$prop}: #{$val} !important;
+        }
+    }
+
+    @each $key,
+    $val in $breakpoints {
+        @media screen and (min-width: #{$val}) {
+            .#{$key + $separator} {
+
+                @each $key,
+                $val in $map {
+                    &#{$prefix}#{$key} {
+                        #{$prop}: #{$val} !important;
+                    }
+                }
+            }
+        }
+    }
+}
+
+@include style-class('margin-left', $block-column-offsets);
